@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-import Data.Time.Format.ISO8601 (yearFormat)
+import Data.Time.Format.ISO8601 (yearFormat) 
 {-# HLINT ignore "[]" #-}
 {-# HLINT ignore "[]" #-}
 doubleMe :: Num a => a -> a
