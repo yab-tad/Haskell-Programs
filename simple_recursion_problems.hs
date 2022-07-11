@@ -24,3 +24,28 @@ take' n (x:xs) = x : take' (n-1) xs
 reverse' :: [a] -> [a]
 reverse' [] = []
 reverse' (x:xs) = reverse' xs ++ [x]
+
+-- a functions that produces a list with an infinite number of the same element
+repeat' :: a -> [a]
+repeat' x = x:repeat' x
+
+-- zip function reproduced
+zip' :: [a] -> [b] -> [(a,b)]
+zip' [] _ = []
+zip' _ [] = []
+zip' (x:xs) (y:ys) = (x,y) : zip' xs ys
+
+-- elem function reproduced
+elem' :: Eq a => a -> [a] -> Bool
+elem' y [] = False
+elem' y (x:xs)
+  | y == x = True 
+  | otherwise = elem' y xs
+
+-- Quick Sort function
+quickSort :: Ord a => [a] -> [a]
+quickSort [] = []
+quickSort (p:xs) =
+  let smallerOrEq = [x | x <- xs, x <= p]
+      larger = [x | x <- xs, x > p]
+  in quickSort smallerOrEq ++ [p] ++ quickSort larger
