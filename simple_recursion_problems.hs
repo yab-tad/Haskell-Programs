@@ -49,3 +49,12 @@ quickSort (p:xs) =
   let smallerOrEq = [x | x <- xs, x <= p]
       larger = [x | x <- xs, x > p]
   in quickSort smallerOrEq ++ [p] ++ quickSort larger
+
+-- Function that sorts and merges two lists
+merge' :: (Ord a, Eq a) => [a] -> [a] -> [a]
+merge' [] (y:ys) = (y:ys)
+merge' (x:xs) [] = (x:xs)
+merge' [] [] = []
+merge' (x:xs) (y:ys)
+  | x <= y = quickSort (x : merge' xs (y:ys))
+  | otherwise = quickSort (y : merge' (x:xs) ys)
