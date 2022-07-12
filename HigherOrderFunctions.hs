@@ -31,7 +31,7 @@ The function declaration below is the same as:
 compareWithHundred :: Int -> Ordering
 compareWithHundred = compare 100
 
--- Working with sections to partially apply infix functions. (Infix function: + * / > < == >=)
+-- Working with sections to partially apply infix functions. (Infix function: + subtract * / > < == >= && ||)
 -- Functions that do arithmetic operations with the number 10
 divbyTen :: (Floating a) => a -> a
 divbyTen = (/10)
@@ -56,3 +56,17 @@ arithByTen a =
 -- a boolean function that checks whether its parameter is an Uppercase character or not
 isUpperAlphanum :: Char -> Bool
 isUpperAlphanum = (`elem` ['A'..'Z'])
+
+-- Some higher order function that takes in a function of some type and a value of the same type as parameters and returns a value of the same type
+applyTwice :: (a -> a) -> a -> a
+applyTwice f x = f (f x)
+
+-- Implementation of the zipWith function
+zipWith' :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith' _ _ [] = []
+zipWith' _ [] _ = []
+zipWith' f (x:xs) (y:ys) = f x y : zipWith' f xs ys
+
+-- Fliping function
+flip' :: (a -> b -> c) -> b -> a -> c
+flip' f x y = f y x
