@@ -114,7 +114,7 @@ collatzSeq n
     | even n = n : collatzSeq (n `div` 2)
     | odd n = n : collatzSeq (n*3 + 1)
 
--- Collatz sequences of numbers from 1 o 100 (inclusive) that have length greater than 15
+-- Collatz sequences of numbers from 1 to 100 (inclusive) that have length greater than 15
 num15LongChains :: Int
 -- num15LongChains = length (filter (>15) (map length (map collatzSeq [1..100])))
 num15LongChains = length (filter len (map collatzSeq [1..100]))
@@ -129,3 +129,25 @@ multiple = (listOfMultipliers !! 2)
 {- now adding any integer as a parameter for the function(name) multiple 
 multiplies the value by the second element of the multiple function returned 
 by the function listOfMultipliers. -}
+
+-- using lambda function to implement num15LongChains
+num15LongChainsLambda :: Int
+num15LongChainsLambda = length (filter (\xs -> length xs > 15) (map collatzSeq [1..100]))
+
+-- more implementations of lambda function
+zipMeRealGood :: [Double]
+zipMeRealGood = zipWith (\a b -> (a * 30 + 3) / b)[5,4,3,2,1] [1,2,3,4,5]
+
+mapMeRealGood :: [Integer]
+mapMeRealGood = map (\(a,b) -> a + b) [(1,2),(3,5),(6,3),(2,6),(2,5)]
+
+-- due to the way functions are curried by default, these two are equivalent:
+addThree :: (Num a) => a -> a -> a -> a
+addThree x y z = x+y+z
+
+addThreeLambda :: (Num a) => a -> a -> a -> a
+addThreeLambda = \x -> \y -> \z -> x + y + z
+
+flip'' :: (a -> b -> c) -> b -> a -> c
+flip'' f = \x y -> f y x {- usually used in this case to indicate that our function 
+is meant to be partially applied and passed on to a function as a parameter. -}
