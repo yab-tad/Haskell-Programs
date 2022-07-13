@@ -70,3 +70,62 @@ zipWith' f (x:xs) (y:ys) = f x y : zipWith' f xs ys
 -- Fliping function
 flip' :: (a -> b -> c) -> b -> a -> c
 flip' f x y = f y x
+
+-- Map function
+map' :: (a -> b) -> [a] -> [b]
+map' _ [] = []
+map' f (x:xs) = f x : map' f xs
+
+-- Filter function. This function takes in predicates and returns a boolean value, and a list then return a list whose elements satisfy the predicate conditions
+filter' :: (a -> Bool) -> [a] -> [a]
+filter' _ [] = []
+filter' p (x:xs)
+    | p x = x : filter' p xs
+    | otherwise = filter' p xs
+
+-- QuickSort using the filter function
+quickSort' :: (Ord a) => [a] -> [a]
+quickSort' [] = []
+quickSort' (x:xs) =
+    let smallerElements = quickSort' (filter' (<=x) xs)
+        largerElements = quickSort' (filter' (>x) xs)
+    in smallerElements ++ [x] ++ largerElements
+
+-- a function that returns the largest number under 100,000 that's divisible by 3829
+largestDivisible :: (Integral a) => a
+largestDivisible = head (filter' p [100000,99999..])
+    where p x = x `mod` 3829 == 0
+
+-- implementing takeWhile function
+takeWhile' :: (a -> Bool) -> [a] -> [a]
+takeWhile' _ [] = []
+takeWhile' p (x:xs)
+    | p x = x : takeWhile' p xs
+    | otherwise = []
+
+-- sum of odd squared numbers less than 10,000
+sOSQ :: Integer
+sOSQ = sum (takeWhile' (<10000) (filter' odd (map (^2) [1..])))
+
+-- Collatz Sequence
+collatzSeq :: (Integral a) => a -> [a]
+collatzSeq 1 = [1]
+collatzSeq n
+    | even n = n : collatzSeq (n `div` 2)
+    | odd n = n : collatzSeq (n*3 + 1)
+
+-- Collatz sequences of numbers from 1 o 100 (inclusive) that have length greater than 15
+num15LongChains :: Int
+-- num15LongChains = length (filter (>15) (map length (map collatzSeq [1..100])))
+num15LongChains = length (filter len (map collatzSeq [1..100]))
+    where len xs = length xs > 15
+
+-- another interesting usecase of partial function using map
+listOfMultipliers :: [Integer -> Integer]
+listOfMultipliers = map (*) [0..]
+
+multiple :: Integer -> Integer
+multiple = (listOfMultipliers !! 2) 
+{- now adding any integer as a parameter for the function(name) multiple 
+multiplies the value by the second element of the multiple function returned 
+by the function listOfMultipliers. -}
