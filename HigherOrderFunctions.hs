@@ -151,3 +151,35 @@ addThreeLambda = \x -> \y -> \z -> x + y + z
 flip'' :: (a -> b -> c) -> b -> a -> c
 flip'' f = \x y -> f y x {- usually used in this case to indicate that our function 
 is meant to be partially applied and passed on to a function as a parameter. -}
+
+-- lambda expression implementation for using the function map for 2D Lists
+map2D :: (a -> b) -> [[a]] -> [[b]]
+map2D _ [[]] = [[]]
+map2D f xs = map (\ys -> map f ys) xs
+
+-- map function for 2D Lists using function Composition
+map2DCom :: (a -> b) -> [[a]] -> [[b]]
+map2DCom f xs = (map . map) f xs
+
+-- using the dollar sign ($) inorder to bring forth a cleaner code with less parenthesis
+lenOfNewList :: Int
+lenOfNewList = length $ map (+1) [1,2,3]
+
+filteredMappedL :: (Num a, Ord a) => [a] -> [a]
+filteredMappedL xs = map (^2) $ filter (>3) xs
+
+-- dropWhile implementation
+dropWhile' :: (a -> Bool) -> [a] -> [a]
+dropWhile' _ [] = []
+dropWhile' p xs@(y:ys)
+    | p y = dropWhile' p ys
+    | otherwise = xs
+
+-- concatinating 2D lists
+concat2D :: [[a]] -> [a]
+concat2D [] = []
+concat2D (x:xs) = x ++ concat2D xs
+
+-- sum of cubed elements of a list
+cubedSum :: (Num a) => [a] -> a
+cubedSum xs = sum $ map (^3) xs
