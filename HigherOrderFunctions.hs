@@ -183,3 +183,12 @@ concat2D (x:xs) = x ++ concat2D xs
 -- sum of cubed elements of a list
 cubedSum :: (Num a) => [a] -> a
 cubedSum xs = sum $ map (^3) xs
+
+{- Pack consecutive duplicates of list elements into sublists. 
+If a list contains repeated elements they should be placed in separate sublists. -}
+pack :: Eq a => [a] -> [[a]]
+pack [] = []
+pack c@(x:xs)= adj : (pack . drop adjLen) c
+    where adj = takeWhile(== x) c
+          adjLen = length adj
+
