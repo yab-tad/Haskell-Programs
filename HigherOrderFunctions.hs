@@ -192,3 +192,37 @@ pack c@(x:xs)= adj : (pack . drop adjLen) c
     where adj = takeWhile(== x) c
           adjLen = length adj
 
+-- Implementing Fold both for foldr (fold right) and foldl (fold left)
+foldr' :: (a -> b -> b) -> b -> [a] -> b
+foldr' f z [] = z
+foldr' f z (x:xs) = f x (foldr' f z xs)
+
+foldl' :: (a -> b -> a) -> a -> [b] -> a
+foldl' f z [] = z
+foldl' f z (x:xs) = foldl' f (f z x) xs
+
+-- Building functions using fold
+
+concat2Dr :: [[a]] -> [a]
+concat2Dr xss = foldr' (++) [] xss
+
+sumr :: Integral a => [a] -> a
+sumr = foldr' (+) 0
+
+concat2Dl :: [[a]] -> [a]
+concat2Dl = foldl' (++) []
+
+suml :: [Int] -> Int
+suml xs = foldl' (+) 0 xs
+
+and', or' :: [Bool] -> Bool
+and' xs = foldl' (&&) True xs
+or' xs = foldr' (||) False xs
+
+elem' :: (Eq a) => a -> [a] -> Bool
+elem' x = foldl' (\z y -> if x == y then True else z) False
+
+{-
+taker :: [a] -> b -> [a]
+taker n xs = foldr  [] xs
+-}
