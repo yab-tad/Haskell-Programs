@@ -228,6 +228,12 @@ mapR f xs = foldr' (\x acc -> f x : acc) [] xs
 mapL :: (a -> b) -> [a] -> [b]
 mapL f xs = foldl' (\acc x -> acc ++ [f x]) [] xs
 
+filterR :: (Eq a, Ord a) => (a -> Bool) -> [a] -> [a]
+filterR p xs = foldr' (\x acc -> if p x then x:acc else acc) [] xs
+
+filterL :: (Eq a, Ord a) => (a -> Bool) -> [a] ->[a]
+filterL p xs= foldl' (\acc x -> if p x then acc ++ [x] else acc) [] xs
+
 takeR :: Int -> [a] -> [a]
 takeR n xs = foldr' (\x container -> if length container < n then container ++ [x] else container) [] (reverse xs)
 
