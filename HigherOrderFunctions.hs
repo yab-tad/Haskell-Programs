@@ -251,6 +251,41 @@ sumL1 = foldl1 (+)
 sumR1 :: [Int] -> Int
 sumR1 = foldr1 (+)
 
+headR1 :: [a] -> a
+headR1 = foldr1 (\x _ -> x)
+
+lastL1 :: [a] -> a
+lastL1 = foldl1 (\_ x -> x)
+
+productR1:: [Int] -> Int
+productR1 = foldr1 (*)
+
+productL1 :: [Int] -> Int
+productL1 = foldl1 (*)
+
 -- maximum function
 maximumR1 :: Ord a => [a] -> a
 maximumR1 = foldr1 (\x acc -> if x > acc then x else acc)
+
+maximumL1 :: Ord a => [a] -> a
+maximumL1 = foldl1 (\acc x -> if x > acc then x else acc)
+
+-- reverse function
+reverseR :: [a] -> [a]
+reverseR xs = foldr' (\x acc -> acc ++ [x]) [] xs
+
+reverseL :: [a] -> [a]
+reverseL = foldl' (\acc x -> x : acc) []
+
+-- scanl and scanr are like foldl and foldr, but they report on the intermediate accumulator states
+
+accStateAddL :: [Integer]
+accStateAddL = scanl (+) 0 [1,2,3,4] -- returns [0,1,3,6,10]
+
+accStateAddR :: [Integer]
+accStateAddR = scanr (+) 0 [1,2,3,4] -- returns [10,6,3,1,0]
+
+-- scanl
+
+-- there also exists the possibility to use scanl1 and scanr1 counterpars
+
