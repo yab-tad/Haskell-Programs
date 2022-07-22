@@ -222,7 +222,70 @@ or' xs = foldr' (||) False xs
 elem' :: (Eq a) => a -> [a] -> Bool
 elem' x = foldl' (\z y -> if x == y then True else z) False
 
-{-
-taker :: [a] -> b -> [a]
-taker n xs = foldr  [] xs
--}
+mapR :: (a -> b) -> [a] -> [b]
+mapR f xs = foldr' (\x acc -> f x : acc) [] xs
+
+mapL :: (a -> b) -> [a] -> [b]
+mapL f xs = foldl' (\acc x -> acc ++ [f x]) [] xs
+
+filterR :: (Eq a, Ord a) => (a -> Bool) -> [a] -> [a]
+filterR p xs = foldr' (\x acc -> if p x then x:acc else acc) [] xs
+
+filterL :: (Eq a, Ord a) => (a -> Bool) -> [a] ->[a]
+filterL p xs= foldl' (\acc x -> if p x then acc ++ [x] else acc) [] xs
+
+takeR :: Int -> [a] -> [a]
+takeR n xs = foldr' (\x container -> if length container < n then container ++ [x] else container) [] (reverse xs)
+
+takeL :: Int -> [a] -> [a]
+takeL n xs = reverse(foldl' (\acc x -> if length acc < n then x:acc else acc ) [] xs)
+
+{- By using foldl1 and foldr1 we eliminate the need to provide them with an 
+explicite starting value as they treat the first (or last) element of the 
+list as a starting value and then start folding it with the element next to it -}
+
+-- implementing the sum function
+sumL1 :: [Int] -> Int
+sumL1 = foldl1 (+)
+
+sumR1 :: [Int] -> Int
+sumR1 = foldr1 (+)
+
+headR1 :: [a] -> a
+headR1 = foldr1 (\x _ -> x)
+
+lastL1 :: [a] -> a
+lastL1 = foldl1 (\_ x -> x)
+
+productR1:: [Int] -> Int
+productR1 = foldr1 (*)
+
+productL1 :: [Int] -> Int
+productL1 = foldl1 (*)
+
+-- maximum function
+maximumR1 :: Ord a => [a] -> a
+maximumR1 = foldr1 (\x acc -> if x > acc then x else acc)
+
+maximumL1 :: Ord a => [a] -> a
+maximumL1 = foldl1 (\acc x -> if x > acc then x else acc)
+
+-- reverse function
+reverseR :: [a] -> [a]
+reverseR xs = foldr' (\x acc -> acc ++ [x]) [] xs
+
+reverseL :: [a] -> [a]
+reverseL = foldl' (\acc x -> x : acc) []
+
+-- scanl and scanr are like foldl and foldr, but they report on the intermediate accumulator states
+
+accStateAddL :: [Integer]
+accStateAddL = scanl (+) 0 [1,2,3,4] -- returns [0,1,3,6,10]
+
+accStateAddR :: [Integer]
+accStateAddR = scanr (+) 0 [1,2,3,4] -- returns [10,6,3,1,0]
+
+-- scanl
+
+-- there also exists the possibility to use scanl1 and scanr1 counterpars
+
