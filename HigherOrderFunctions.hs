@@ -285,7 +285,25 @@ accStateAddL = scanl (+) 0 [1,2,3,4] -- returns [0,1,3,6,10]
 accStateAddR :: [Integer]
 accStateAddR = scanr (+) 0 [1,2,3,4] -- returns [10,6,3,1,0]
 
--- scanl
+flipMinus :: [Integer]
+flipMinus = scanl (flip (-)) 2 [1,3,4,5]  --returns [2,-1,4,0,5]
 
--- there also exists the possibility to use scanl1 and scanr1 counterpars
+flipConcat = scanl (flip (:)) [] [4,3,2,1] --returns [[],[4],[3,4],[2,3,4],[1,2,3,4]]
+
+-- there also exists the possibility to use scanl1 and scanr1 counterparts
+
+flipDiv1 :: [Double] -> [Double]
+flipDiv1 = scanl1 (flip (/)) -- when fed [1,3,2,1], it returns [1.0,3.0,0.6666666666666666,1.5]
+
+-- How many elements does it take for the sum of the roots of all natural numbers to exceed 1000? 
+sqrtSum :: Int
+sqrtSum = (+1) . length . takeWhile (<1000) . scanl1 (+) . map sqrt $ [1..]
+-- a more readable way to implement this is:
+sqrtSum2 :: Int
+sqrtSum2 = 
+    let summedSqrt = scanl1 (+) . map sqrt $ [1..]
+        lenLimit = length . takeWhile (<1000) $ summedSqrt
+    in  lenLimit + 1
+{- returns 131 as the summation of the square root of 131 elements results 
+in a value greater than or equal to 10,000 -}
 
