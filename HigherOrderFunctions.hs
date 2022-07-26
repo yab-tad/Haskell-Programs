@@ -135,11 +135,11 @@ num15LongChainsLambda :: Int
 num15LongChainsLambda = length (filter (\xs -> length xs > 15) (map collatzSeq [1..100]))
 
 -- more implementations of lambda function
-zipMeRealGood :: [Double]
-zipMeRealGood = zipWith (\a b -> (a * 30 + 3) / b)[5,4,3,2,1] [1,2,3,4,5]
+zipMeReal :: [Double]
+zipMeReal = zipWith (\a b -> (a * 30 + 3) / b)[5,4,3,2,1] [1,2,3,4,5]
 
-mapMeRealGood :: [Integer]
-mapMeRealGood = map (\(a,b) -> a + b) [(1,2),(3,5),(6,3),(2,6),(2,5)]
+mapMeReal :: [Integer]
+mapMeReal = map (\(a,b) -> a + b) [(1,2),(3,5),(6,3),(2,6),(2,5)]
 
 -- due to the way functions are curried by default, these two are equivalent:
 addThree :: (Num a) => a -> a -> a -> a
