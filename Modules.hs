@@ -1,4 +1,5 @@
 import Data.List
+import Data.Map
 
 -- number of unique elements in a list
 numUnq :: Eq a => [a] -> Int
@@ -129,7 +130,122 @@ splitAtT1 = splitAt 3 "what's up" --returns ("wha","t's up")
 splitAtT2 :: ([Char], [Char]) --returns ("well hello children","")
 splitAtT2 = splitAt 34 "well hello children"
 
-splitAtT3 :: [Char]  --returns "courtfood"
-splitAtT3 = 
+splitAtT3 :: ([Char], [Char])
+splitAtT3 = splitAt (-2) "hello" --returns ("","hello")
+
+splitAtT4 :: [Char]  --returns "courtfood"
+splitAtT4 = 
         let (a,b) = splitAt 4 "foodcourt"
         in b ++ a
+
+{- `takeWhile` : takes a predicate and a list. It parses through the 
+list until an element is encountered that doesn't satisfy the predicate 
+conditoin. It then returns the previous elements in a list -}
+
+-- Say we wanted to know the sum of all third powers that are under 10,000.
+sumCubedP :: Integer
+sumCubedP = sum . takeWhile (<10000) $ map (^3) [1..] --returns 53361
+
+{- `dropWhile` : similar to the `takeWhile` function but instead of returning 
+the list until the predicate is broken, `dropWhile` drops the elements that 
+satisfy the predicate and return the rest once the condition is broken. -}
+dropWtest1 :: [Int]
+dropWtest1 = dropWhile (==3) [3,3,3,1,2,3,4] -- returns [1,2,3,4]
+
+{- We're given a list that represents the value of a stock by date. The 
+list is made of tuples whose first component is the stock value, the 
+second is the year, the third is the month and the fourth is the date. We 
+want to know when the stock value first exceeded one thousand dollars! -}
+
+dropWtest2 :: (Double, Integer, Integer, Integer) --returns (1001.4,2008,9,4)
+dropWtest2 = 
+        let stock = [(994.4,2008,9,1),(995.2,2008,9,2),(999.2,2008,9,3),(1001.4,2008,9,4),(998.3,2008,9,5)]
+        in head $ dropWhile (\(v,y,m,d) -> v < 1000) stock
+
+{- `span` : is like `takeWhile` but returns a pair of lists in a tuple. The first contains the 
+elements satisfying the predicate and the second contains the rest of the elements. -}
+spanT1 :: [Char]
+spanT1 = 
+        let (first, rest) = span (/= ' ') "The one who shall not be named"
+        in "First: " ++ first ++ " | rest:" ++ rest
+
+{- `break` : similar to `span`, but instead of spanning through the list 
+when the predicate is met it breaks and return the elements until then as 
+the first list and the rest on the second. -}
+
+breakT1 :: [Char] --returns "First: , rest:The one who shall not be named"
+breakT1 = let (first, rest) = break (/= ' ') "The one who shall not be named"
+          in "First: " ++ first ++ ", rest:" ++ rest
+
+breakT2 :: ([Int],[Int])
+breakT2 = break (>3) [1,2,3,4,5,6] --return ([1,2,3],[4,5,6])
+
+{- `sort` : simply sorts a list. The type of the elements in the list has 
+to be part of the Ord typeclass, because if the elements of a list can't 
+be put in some kind of order, then the list can't be sorted. -}
+
+sortT1 :: [Integer]
+sortT1 = sort [31,4,5,62,44,6] -- returns [4,5,6,31,44,62]
+
+sortT2 :: [Char]
+sortT2 = sort "haskell is lazy"  --returns "  aaehiklllssyz"
+
+-- `group` : takes a list and groups adjecent elements in sublist if they are equal
+groupT1 :: [[Integer]]
+groupT1 = group [1,1,3,3,3,4,2,2,2,3,3,5] --returns [[1,1],[3,3,3],[4],[2,2,2],[3,3],[5]]
+
+groupT2 :: [[Char]]  --returns ["aa"," ","bbb"," ","a"," ","aaa"," ","bb"," ","ccc"," ","aa"]
+groupT2 = group "aa bbb a aaa bb ccc aa"
+
+-- If we sort a list before grouping it, we can find out how many times each element appears in the list.
+groupT3 :: [(Int, Int)] --returns [(1,6),(2,4),(3,4)]
+groupT3 = map (\l@(x:xs) -> (x,length(l))) . group . sort $ [1,1,1,1,2,2,2,3,3,1,1,3,3,2]
+
+-- `inits` and `tails` : they are like `init` and `tail` but they recursively go through every element in the list.
+initails :: [([Char],[Char])]
+initails = let l = "hello"  --returns [("","hello"),("h","ello"),("he","llo"),("hel","lo"),("hell","o"),("hello","")]
+           in zip (inits l) (tails l)
+
+search :: Eq a => [a] -> [a] -> Bool
+search needle haystack = 
+        let nlen = length needle
+        in foldl (\acc x -> if take nlen x == needle then True else acc) False (tails haystack)
+
+-- `isInfixOf` : similar to the `search` function defined above
+isInf1 :: Bool
+isInf1 = isInfixOf "cat" "I own a cat" --returns True
+
+isInf2 :: Bool
+isInf2 = "Cat" `isInfixOf` "a cat hunter" --returns False
+
+-- `isPrefixOf` and `isSuffixOf` : search for a sublist at the beginning and at the end of a list, resectively.
+isPreT :: Bool
+isPreT = "cat" `isPrefixOf` "cats are adorable" -- returns True
+
+isSufT1 :: Bool
+isSufT1 = "cat" `isSuffixOf` "i don't have cats" --returns False
+
+isSufT2 :: Bool
+isSufT2 = "cat" `isSuffixOf` "i don't have a cat" --returns True
+
+-- `elem` and `notElem` : to check if an element is inside a list or not
+e1 :: Bool
+e1 = elem 3 [1,2,3] --returns True
+
+e2 :: Bool
+e2 = notElem 3 [1,2,5] --returns True
+
+-- `partition` : takes a list and a predicate and returns a pair of lists. The first list in the result contains all the elements that satisfy the predicate, the second contains all the ones that don't.
+partT :: ([Char], [Char]) --returns ("MDS","y name is r. trange")
+partT = partition (`elem` ['A'..'Z']) "My name is Dr. Strange"
+
+-- `find` : takes a list and a predicate and returns the first element that satisfies the predicate. But it returns that element wrapped in a Maybe value.
+find' :: (a -> Bool) -> [a] -> Maybe a
+find' f xs = listToMaybe $ filter f xs
+
+find1 :: Maybe Integer
+find1 = find' (==3) [1,2,3,4,5] --returns Just 3
+
+find2 :: Maybe Integer
+find2 = find (>6) [1,2,3,4,5] --returns Nothing
+
