@@ -1,5 +1,6 @@
 import Data.List
 import Data.Map
+import Data.Maybe
 
 -- number of unique elements in a list
 numUnq :: Eq a => [a] -> Int
@@ -240,12 +241,19 @@ partT :: ([Char], [Char]) --returns ("MDS","y name is r. trange")
 partT = partition (`elem` ['A'..'Z']) "My name is Dr. Strange"
 
 -- `find` : takes a list and a predicate and returns the first element that satisfies the predicate. But it returns that element wrapped in a Maybe value.
-find' :: (a -> Bool) -> [a] -> Maybe a
-find' f xs = listToMaybe $ filter f xs
+--find' :: (a -> Bool) -> [a] -> Maybe a
+--find' f xs = listToMaybe $ filter f xs
 
 find1 :: Maybe Integer
 find1 = find' (==3) [1,2,3,4,5] --returns Just 3
 
 find2 :: Maybe Integer
 find2 = find (>6) [1,2,3,4,5] --returns Nothing
+
+-- Maybe datatype definition
+data Maybe' a = Nothing | Just a
+
+-- Division using Maybe
+safeDiv :: Integral a => a -> a -> Maybe
+safeDiv a b = if b == 0 then Nothing else Just $ div a b
 
