@@ -306,4 +306,3 @@ sqrtSum2 =
     in  lenLimit + 1
 {- returns 131 as the summation of the square root of 131 elements results 
 in a value greater than or equal to 10,000 -}
-
