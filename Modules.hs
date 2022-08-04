@@ -1,6 +1,8 @@
 import Data.List
-import Data.Map
-import Data.Maybe
+import qualified Data.Map as Map
+import Data.Maybe()
+import Data.Char
+import InteractiveEval (Term(val))
 
 -- number of unique elements in a list
 numUnq :: Eq a => [a] -> Int
@@ -245,15 +247,75 @@ partT = partition (`elem` ['A'..'Z']) "My name is Dr. Strange"
 --find' f xs = listToMaybe $ filter f xs
 
 find1 :: Maybe Integer
-find1 = find' (==3) [1,2,3,4,5] --returns Just 3
+find1 = find (==3) [1,2,3,4,5] --returns Just 3
 
 find2 :: Maybe Integer
 find2 = find (>6) [1,2,3,4,5] --returns Nothing
 
 -- Maybe datatype definition
-data Maybe' a = Nothing | Just a
+-- data Maybe k = Nothing | Just k
 
 -- Division using Maybe
-safeDiv :: Integral a => a -> a -> Maybe
+safeDiv :: (Integral a) => a -> a -> Maybe a
 safeDiv a b = if b == 0 then Nothing else Just $ div a b
 
+----- Data.Map
+
+-- phone book dictionary
+phoneBook :: [([Char], [Char])]
+phoneBook =   
+    [("betty","555-2938")  
+    ,("bonnie","452-2928")  
+    ,("patsy","493-2928")  
+    ,("lucille","205-2928")  
+    ,("wendy","939-8282")  
+    ,("penny","853-2492")
+    ,("penny","856-4229")  
+    ]
+
+-- Key-Value pair matcher in a dictionary
+dictFind :: Eq key => key -> [(key, value)] -> Maybe value
+dictFind key dict = foldl (\acc (k,v) -> if k==key then Just v else acc) Nothing dict
+{- dictFind key dict = snd . head . filter (\(k,v) -> (key==k)) $ dict
+
+ dictFind key [] = Nothing
+ dictFind key ((k,v):xs) = if k == key then Just v else dictFind key xs -}
+
+phoneBookToMap1:: Ord k => [(k,String)] -> Map.Map k String
+phoneBookToMap1 xs = Map.fromListWith (\num1 num2 -> num1 ++ ", " ++ num2) xs 
+-- for [("ab","kv"),("ab","kd")] it returns fromList [("ab","kd, kv")]
+
+
+penny1 :: Maybe String
+penny1 = Map.lookup "penny" $ phoneBookToMap1 phoneBook -- returns Just "856-4229, 853-2492"
+
+
+phoneBookToMap2 :: Ord k => [(k,String)] -> Map.Map k [String] 
+phoneBookToMap2 xs = Map.fromListWith (++) $ map (\(k,v) -> (k,[v])) xs
+-- for [("ab","kv"),("ab","kd")]) it returns fromList [("ab",["kd","kv"])]
+
+
+penny2 :: Maybe [String]
+penny2 = Map.lookup "penny" $ phoneBookToMap2 phoneBook -- returns Just ["856-4229","853-2492"]
+
+addSimKey :: (Ord k, Num v) => [(k,v)] -> Map.Map k v
+addSimKey = Map.fromListWith (+)
+-- given [(1,2),(1,4),(2,4),(3,9),(3,1)] it returns fromList [(1,6),(2,4),(3,10)]
+
+mapit :: (Ord k, Num a) => a -> [(k,a)] -> Map.Map k a
+mapit m xs = Map.map (*m) $ Map.fromList xs
+-- Given 100 [(1,1),(2,2),(3,3)] it returns fromList [(1,100),(2,200),(3,300)]
+
+-- `singleton` takes a key and a value and creates a map that has exactly one mapping.
+-- 'toList` is the inverse of `fromList`
+mapToList :: [(Integer, Integer)]
+mapToList = Map.toList $ Map.insert 8 6 $ Map.singleton 4 3 --returns [(4,3),(8,6)]
+
+-- filterUpp :: Map.Map k v
+filterUpp :: Ord k => [(k,Char)] -> Map.Map k Char
+filterUpp xs = Map.filter isUpper $ Map.fromList xs
+-- Given [(1,'a'),(2,'A'),(3,'b'),(4,'B')] it returns fromList [(2,'A'),(4,'B')]
+
+insertW :: Ord a => (a -> a -> a) -> a -> a -> [(a,a)] -> Map.Map a a
+insertW f k v xs = Map.insertWith f k v $ Map.fromList xs
+-- addInsertW (*) 3 100 [(3,200),(4,400)] returns fromList [(3,20000),(4,400)]
