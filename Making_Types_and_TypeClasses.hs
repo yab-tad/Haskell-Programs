@@ -10,8 +10,8 @@ module Shapes (
 ) where
 
 
-import GhcPlugins (all2)
 import Data.List
+import qualified Data.Map as Map
 
 
 -- Algebraic Data types
@@ -241,6 +241,97 @@ sorted = sort [chansey, slowking, jigglypuff]
         sorted == unsorted returns False
         sorted /= unsorted returns True
         sorted < unsorted returns True
+-}
+
+
+-- TYPE SYNONYMS
+{-Type synonyms don't really do anything per se, they're just about giving some types different names so 
+that they make more sense to someone reading our code and documentation. Here's how the standard library 
+defines String as a synonym for [Char]. -}
+
+-- type String = [Char]
+
+type PhoneNumber = String
+type Name = String
+type PhoneBook = [(Name, PhoneNumber)]
+
+phoneBook1 :: PhoneBook
+phoneBook1 =   
+    [("betty","555-2938")  
+    ,("bonnie","452-2928")  
+    ,("patsy","493-2928")  
+    ,("lucille","205-2928")  
+    ,("wendy","939-8282")  
+    ,("penny","853-2492")
+    ,("penny","856-4229")  
+    ]
+
+inPhoneBook :: Name -> PhoneNumber -> PhoneBook -> Bool
+inPhoneBook name pnum pbook = (name, pnum) `elem` pbook
+-- inPhoneBook "wendy" "939-8282" phoneBook1 returns True
+
+{- Type synonyms can also be parameterized. If we want a type that represents an association list type 
+but still want it to be general so it can use any type as the keys and values, we can do this: -}
+type AssocList k v = [(k,v)]  -- read "[(1,2),(3,5),(8,9)]" :: AssocList Int Int returns [(1,2),(3,5),(8,9)]
+
+-- Partially applied type constructor
+type IntMap v = Map.Map Int v
+--Or
+type IntMap' = Map.Map Int
+
+
+-- data Either a b = Left a | Right b deriving(Show, Eq, Ord, Read)
+{- It has two value constructors. If the Left is used, then its contents are of type a and if Right is used, 
+   then its contents are of type b. So we can use this type to encapsulate a value of one type or another and then when we get a 
+   value of type Either a b, we usually pattern match on both Left and Right and we different stuff based on which one of them it was. -}
+
+{- 
+    An example: a high-school has lockers so that students have some place to put their Guns'n'Roses posters. Each locker has a 
+    code combination. When a student wants a new locker, they tell the locker supervisor which locker number they want and he 
+    gives them the code. However, if someone is already using that locker, he can't tell them the code for the locker and they 
+    have to pick a different one. We'll use a map from Data.Map to represent the lockers. It'll map from locker numbers to a 
+    pair of whether the locker is in use or not and the locker code.
+-}
+
+data LockerState = Taken | Free deriving(Show, Eq)
+type Code = String
+type LockerMap = Map.Map Int (LockerState, Code)
+
+lockerLookup :: Int -> LockerMap -> Either String Code
+lockerLookup lockerNumber map = case Map.lookup lockerNumber map of
+                                    Prelude.Nothing -> Left $ "Locker number " ++ show lockerNumber ++ " does not exists!"
+                                    Prelude.Just(state, code) -> if state == Free 
+                                                            then Right code
+                                                            else Left $ "Locker number " ++ show lockerNumber ++ " is taken!" 
+
+lockers :: LockerMap
+lockers = Map.fromList   
+    [(100,(Taken,"ZD39I"))  
+    ,(101,(Free,"JAH3I"))  
+    ,(103,(Free,"IQSA9"))  
+    ,(105,(Free,"QOTSA"))  
+    ,(109,(Taken,"893JJ"))  
+    ,(110,(Taken,"99292"))  
+    ] 
+
+
+
+-- RECURSIVE DATA STRUCTURES
+
+-- Implementing the List data type
+data List a = Empty | Cons a (List a) deriving (Show, Eq, Ord, Read)
+-- data List a = Empty | Cons {listHead :: a, listTail :: List a} deriving (Show, Eq, Ord, Read)
+{-
+        ghci> Empty  
+        Empty  
+        ghci> 5 `Cons` Empty  
+        Cons 5 Empty  
+        ghci> 4 `Cons` (5 `Cons` Empty)  
+        Cons 4 (Cons 5 Empty)  
+        ghci> 3 `Cons` (4 `Cons` (5 `Cons` Empty))  
+        Cons 3 (Cons 4 (Cons 5 Empty))
+        ghci> Empty `Cons` Empty
+        Cons Empty Empty
 -}
 
 
