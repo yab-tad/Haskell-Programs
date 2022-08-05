@@ -12,7 +12,7 @@ module Shapes (
 
 import Data.List
 import qualified Data.Map as Map
-
+{-# LANGUAGE FlexibleInstances #-}
 
 -- Algebraic Data types
 data Bool' = True | False

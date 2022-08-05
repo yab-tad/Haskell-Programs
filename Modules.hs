@@ -319,3 +319,4 @@ filterUpp xs = Map.filter isUpper $ Map.fromList xs
 insertW :: Ord a => (a -> a -> a) -> a -> a -> [(a,a)] -> Map.Map a a
 insertW f k v xs = Map.insertWith f k v $ Map.fromList xs
 -- addInsertW (*) 3 100 [(3,200),(4,400)] returns fromList [(3,20000),(4,400)]
+
