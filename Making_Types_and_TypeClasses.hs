@@ -332,6 +332,170 @@ data List a = Empty | Cons a (List a) deriving (Show, Eq, Ord, Read)
         Cons 3 (Cons 4 (Cons 5 Empty))
         ghci> Empty `Cons` Empty
         Cons Empty Empty
+
+        > Cons 1 Empty
+        Cons 1 Empty
+        > Cons 2 it
+        Cons 2 (Cons 1 Empty)
+        > Cons 3 it
+        Cons 3 (Cons 2 (Cons 1 Empty))
+-}
+
+listMe :: [a] -> List a
+listMe [] = Empty
+listMe (x:xs) = Cons x (listMe xs)
+-- listMe "hello" returns Cons 'h' (Cons 'e' (Cons 'l' (Cons 'l' (Cons 'o' Empty))))
+-- listMe [Just True, Nothing, Just False] returns Cons (Just True) (Cons Nothing (Cons (Just False) Empty))
+
+infixr 5 :-:
+data List1 a = Emptyy | a :-: (List1 a) deriving(Show, Read, Eq, Ord)
+
+{-  A fixity states how tightly the operator binds and whether it's left-associative or right-associative. 
+For instance, *'s fixity is infixl 7 * and +'s fixity is infixl 6. That means that they're both left-associative 
+(4 * 3 * 2 is (4 * 3) * 2) but * binds tighter than +, because it has a greater fixity, so 5 * 4 + 3 is 
+(5 * 4) + 3. Otherwise, we just wrote a :-: (List a) instead of Cons a (List a). -}
+
+{-
+        ghci> 1 :-: Emptyy
+        1 :-: Emptyy
+        ghci> 2 :-: it
+        2 :-: (1 :-: Emptyy)
+-}
+
+infixr 5 .++
+(.++) :: List1 a -> List1 a -> List1 a
+Emptyy .++ ys = ys
+(x :-: xs) .++ ys = x :-: (xs .++ ys)
+
+{-
+        ghci> 1:-: Emptyy
+        1 :-: Emptyy
+        ghci> 2 :-: 3 :-: Emptyy .++ it
+        2 :-: (3 :-: (1 :-: Emptyy))
+-}
+
+
+-- Tree representation: A binary tree is either a node with two children—which are themselves binary trees, or an empty value.
+data Tree' a = Node a (Tree' a) (Tree' a) | EmptyTree deriving (Show)
+
+singleton' :: a -> Tree' a
+singleton' x = Node x EmptyTree EmptyTree
+
+treeInsert :: Ord a => a -> Tree' a -> Tree' a
+treeInsert x EmptyTree = singleton' x
+treeInsert x (Node y left right) | x == y = Node x left right
+                                 | x > y = Node y left (treeInsert x right)
+                                 | x < y = Node y (treeInsert x left) right
+
+
+treeElem :: Ord a => a -> Tree' a -> Bool
+treeElem x EmptyTree = Prelude.False
+treeElem x (Node y left right)
+    | x == y = Prelude.True
+    | x > y = treeElem x right
+    | x < y = treeElem x left
+
+{- 
+    Inserted nodes:
+
+        ghci> treeInsert 5 EmptyTree
+        Node 5 EmptyTree EmptyTree
+        ghci> treeInsert 6 it
+        Node 5 EmptyTree (Node 6 EmptyTree EmptyTree)
+        ghci> treeInsert 4 it
+        Node 5 (Node 4 EmptyTree EmptyTree) (Node 6 EmptyTree EmptyTree)
+-}
+
+nums :: [Int]
+nums = [3,1,2,5,4]
+
+let numsTree = foldl treeInsert EmptyTree nums
+
+data TrafficLight = Red | Yellow | Green
+
+instance Eq TrafficLight where
+    Red == Red = True
+    Green == Green = True
+    Yellow == Yellow = True
+    _ == _ = False
+
+instance Show TrafficLight where
+    Red = "Red Light"
+    Green = "Green Light"
+    Yellow = "Yellow Light"
+
+{-
+        ghci> Red == Red  
+        True  
+        ghci> Red == Yellow  
+        False  
+        ghci> Red `elem` [Red, Yellow, Green]  
+        True  
+        ghci> [Red, Yellow, Green]  
+        [Red light,Yellow light,Green light] 
+-}
+
+class YesNo a where
+    yesno :: a -> Bool
+
+instance YesNo Int where
+    yesno 0 = False
+    yesno _ = True
+
+instance YesNo [a] where
+    yesno [] = False
+    yesno _ = True
+
+instance YesNo Bool where
+    yesno = id -- id is just a standard library function that takes a parameter and returns the same thing, which is what we would be writing here anyway.
+
+instance YesNo (Maybe a) where
+    yesno Just _ = True
+    yesno Nothing = False
+
+instance YesNo (Tree' a) where
+    yesno EmptyTree = False
+    yesno _ = True
+
+instance YesNo TrafficLight where
+    yesno Red = False
+    yesno _ = True
+
+{-
+        ghci> yesno $ length []  
+        False  
+        ghci> yesno "haha"  
+        True  
+        ghci> yesno ""  
+        False  
+        ghci> yesno $ Just 0  
+        True  
+        ghci> yesno True  
+        True  
+        ghci> yesno EmptyTree  
+        False  
+        ghci> yesno []  
+        False  
+        ghci> yesno [0,0,0]  
+        True  
+        ghci> :t yesno  
+        yesno :: (YesNo a) => a -> Bool
+-}
+
+yesnoIf :: (YesNo y) => y -> a -> a -> a
+yesnoIf yesnoVal yesResult noResult = if yesno yesnoVal then yesResult else noResult
+
+{-
+        ghci> yesnoIf [] "YEAH!" "NO!"  
+        "NO!"  
+        ghci> yesnoIf [2,3,4] "YEAH!" "NO!"  
+        "YEAH!"  
+        ghci> yesnoIf True "YEAH!" "NO!"  
+        "YEAH!"  
+        ghci> yesnoIf (Just 500) "YEAH!" "NO!"  
+        "YEAH!"  
+        ghci> yesnoIf Nothing "YEAH!" "NO!"  
+        "NO!" 
 -}
 
 
@@ -343,7 +507,9 @@ data List a = Empty | Cons a (List a) deriving (Show, Eq, Ord, Read)
 
 
 
-{- #############################################################################################################
+
+{-
+#############################################################################################################
 
 -- The `Num` typeclass implementation is as follows:
 class Num' a where
@@ -403,6 +569,4 @@ data Temperature = C Float | F Float
 --                 Int -> a1 + a2
 --                 Bool -> a1 && a2
 --                 _ -> a1
-
-
 -}
