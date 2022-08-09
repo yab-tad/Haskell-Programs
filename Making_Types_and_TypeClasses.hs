@@ -1,18 +1,20 @@
 
 -- Exporting functions and types to a module
-module Shapes (
-    Shape'(..),
-    Point'(..),
-    baseCircle,
-    baseRect,
-    nudge,
-    surface
-) where
+-- module Shapes (
+--     Shape'(..),
+--     Point'(..),
+--     baseCircle,
+--     baseRect,
+--     nudge,
+--     surface
+-- ) where
 
 
 import Data.List
 import qualified Data.Map as Map
-{-# LANGUAGE FlexibleInstances #-}
+import qualified Data.Maybe as Maybe
+import GHC (typecheckModule)
+
 
 -- Algebraic Data types
 data Bool' = True | False
@@ -245,7 +247,7 @@ sorted = sort [chansey, slowking, jigglypuff]
 
 
 -- TYPE SYNONYMS
-{-Type synonyms don't really do anything per se, they're just about giving some types different names so 
+{- Type synonyms don't really do anything per se, they're just about giving some types different names so 
 that they make more sense to someone reading our code and documentation. Here's how the standard library 
 defines String as a synonym for [Char]. -}
 
@@ -406,24 +408,26 @@ treeElem x (Node y left right)
         Node 5 (Node 4 EmptyTree EmptyTree) (Node 6 EmptyTree EmptyTree)
 -}
 
-nums :: [Int]
 nums = [3,1,2,5,4]
 
-let numsTree = foldl treeInsert EmptyTree nums
+numsTree :: Tree' Integer
+numsTree = foldr treeInsert EmptyTree nums
+-- Node 4 (Node 2 (Node 1 EmptyTree EmptyTree) (Node 3 EmptyTree EmptyTree)) (Node 5 EmptyTree EmptyTree)
 
-data TrafficLight = Red | Yellow | Green
+
+data TrafficLight = Green | Yellow | Red
 
 instance Eq TrafficLight where
-    Red == Red = True
-    Green == Green = True
-    Yellow == Yellow = True
-    _ == _ = False
+    Red == Red = Prelude.True
+    Green == Green = Prelude.True
+    Yellow == Yellow = Prelude.True
+    _ == _ = Prelude.False
 
 instance Show TrafficLight where
-    Red = "Red Light"
-    Green = "Green Light"
-    Yellow = "Yellow Light"
-
+    show Green = "Green Light"
+    show Yellow = "Yellow Light"
+    show Red = "Red Light"
+    
 {-
         ghci> Red == Red  
         True  
@@ -439,27 +443,27 @@ class YesNo a where
     yesno :: a -> Bool
 
 instance YesNo Int where
-    yesno 0 = False
-    yesno _ = True
+    yesno 0 = Prelude.False
+    yesno _ = Prelude.True
 
 instance YesNo [a] where
-    yesno [] = False
-    yesno _ = True
+    yesno [] = Prelude.False
+    yesno _ = Prelude.True
 
 instance YesNo Bool where
     yesno = id -- id is just a standard library function that takes a parameter and returns the same thing, which is what we would be writing here anyway.
 
 instance YesNo (Maybe a) where
-    yesno Just _ = True
-    yesno Nothing = False
+    yesno (Maybe.Just _) = Prelude.True
+    yesno Maybe.Nothing = Prelude.False
 
 instance YesNo (Tree' a) where
-    yesno EmptyTree = False
-    yesno _ = True
+    yesno EmptyTree = Prelude.False
+    yesno _ = Prelude.True
 
 instance YesNo TrafficLight where
-    yesno Red = False
-    yesno _ = True
+    yesno Red = Prelude.False
+    yesno _ = Prelude.True
 
 {-
         ghci> yesno $ length []  
@@ -468,7 +472,7 @@ instance YesNo TrafficLight where
         True  
         ghci> yesno ""  
         False  
-        ghci> yesno $ Just 0  
+        ghci> yesno $ Maybe.Just 0  
         True  
         ghci> yesno True  
         True  
@@ -497,15 +501,6 @@ yesnoIf yesnoVal yesResult noResult = if yesno yesnoVal then yesResult else noRe
         ghci> yesnoIf Nothing "YEAH!" "NO!"  
         "NO!" 
 -}
-
-
-
-
-
-
-
-
-
 
 
 {-
@@ -570,3 +565,103 @@ data Temperature = C Float | F Float
 --                 Bool -> a1 && a2
 --                 _ -> a1
 -}
+
+
+
+-- The Functor Typeclass
+
+instance Functor Tree' where
+    fmap f EmptyTree = EmptyTree
+    fmap f (Node x leftsub rightsub) = Node (f x) (fmap f leftsub) (fmap f rightsub)
+
+{-
+class Functor f where
+    fmap :: (a -> b) -> f a -> f b
+    (<$) :: a -> f b -> f a
+    
+instance Functor [] where
+    fmap = map
+
+instance Functor Maybe where
+    fmap f (Just x) = Just x
+    fmap f Nothing = Nothing
+
+instance Functor Tree where
+    fmap f EmptyTree = EmptyTree
+    fmap f (Node x leftsub rightsub) = Node (f x) (fmap f leftsub) (fmap f rightsub)
+
+instance Functor (Either a) where
+    fmap f (Right x) = Right (f x)
+    fmap f (Left x) = Left x
+
+instance Functor (Map.Map k) where
+    fmap f (Map.Map k v) = Map.Map k (f v)
+
+________________________________________
+                                        |   
+    *Main> fmap (+1) [1..3]             |
+    [2,3,4]                             |
+    *Main> map (+1) [1..3]              |
+    [2,3,4]                             |_______________________________________________________________________
+                                                                                                                |
+    ghci> fmap (++ " HEY GUYS IM INSIDE THE JUST") (Just "Something serious.")                                  |
+    Just "Something serious. HEY GUYS IM INSIDE THE JUST"                                                       |
+    ghci> fmap (++ " HEY GUYS IM INSIDE THE JUST") Nothing                                                      |
+    Nothing                                                                                                     |
+    ghci> fmap (*3) $ Just 100                                                                                  |
+    Just 300                                                                                                    |
+    ghci> fmap (*3) $ Nothing                                                                                   |
+    Nothing                                                                                                     |
+                                                                                                                |
+    ghci> fmap (*2) EmptyTree                                                                                   |
+    EmptyTree                                                                                                   |
+    ghci> fmap (*2) $ foldr treeInsert EmptyTree [4,1,6,8,5]                                                    |
+    Node 10 (Node 2 EmptyTree (Node 8 EmptyTree EmptyTree)) (Node 16 (Node 12 EmptyTree EmptyTree) EmptyTree)   |
+                                                                                                                |
+                                                                                                                |
+________________________________________________________________________________________________________________|
+
+    
+
+-}
+
+-- Kinds and higher-kind types: https://serokell.io/blog/kinds-and-hkts-in-haskell
+
+data Collection' f a = Collection' (f a) deriving (Show)
+
+listify :: Collection' [] Int
+listify = Collection' [1,2,3,4,5] --returns Collection' [1,2,3,4,5]
+
+stringify :: Collection' [] String
+stringify = Collection' ["aaa","bbb"] --returns Collection' ["aaa","bbb"]
+
+maybefy :: Collection' Maybe String
+maybefy = Collection' $ Maybe.Just "Sup!" --returns Collection' (Just "Sup!")
+
+cmap :: Functor f => (a -> b) -> Collection' f a -> Collection' f b
+cmap func (Collection' a) = Collection' (fmap func a) --(<> "!") ["Hello","Fellow", "Humans"]
+
+{- 
+        ghci> cmap (<> "!") $ Collection' ["Hello","Fellow", "Humans"]
+        Collection' ["Hello!","Fellow!","Humans!"]
+
+        ghci> cmap (+2) $ Collection'[1,2,3]
+        Collection' [3,4,5]
+-}
+
+-- the `<$` function: (<$) just runs fmap with const function.
+--      x <$ f = fmap (const x) f
+
+{-
+        ghci> "abc" <$ [1,2,3]
+        ["abc","abc","abc"]
+        ghci> "abc" <$ Nothing
+        Nothing
+        ghci> 1 <$ []
+        []
+        ghci> 1 <$ [0]
+        [1]
+        ghci> 1 <$ [1..5]
+        [1,1,1,1,1]
+-}
+
