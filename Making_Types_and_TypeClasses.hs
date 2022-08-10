@@ -627,6 +627,37 @@ ________________________________________________________________________________
 
 -- Kinds and higher-kind types: https://serokell.io/blog/kinds-and-hkts-in-haskell
 
+data Frank a b = Frank {frankField :: b a} deriving (Show)
+
+{-
+    ghci> :t Frank
+    Frank :: b a -> Frank a b
+    ghci> :k Frank
+    Frank :: * -> (* -> *) -> *
+    
+    ghci> :t Frank {frankField = Just "haha"}
+    Frank {frankField = Maybe.Just "haha"} :: Frank [Char] Maybe
+    
+    ghci> :t Frank {frankField = Node 't' EmptyTree EmptyTree}
+    Frank {frankField = Node 't' EmptyTree EmptyTree}
+    :: Frank Char Tree'
+
+    ghci> :t Frank {frankField = Node "tree" EmptyTree EmptyTree}
+    Frank {frankField = Node "tree" EmptyTree EmptyTree}
+    :: Frank [Char] Tree'
+
+    ghci> :t Frank {frankField = "typeMe"}
+    Frank {frankField = "typeMe"} :: Frank Char []
+-}
+
+class Tofu t where
+    tofu :: j a -> t j a
+
+instance Tofu Frank where
+    tofu x = Frank x
+
+
+
 data Collection' f a = Collection' (f a) deriving (Show)
 
 listify :: Collection' [] Int
