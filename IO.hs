@@ -45,3 +45,11 @@ count n m = do
         3
         4
 -}
+
+main2 :: IO()
+main2 = bar
+
+bar :: IO()
+bar = getLine >>= \s ->
+      getLine >>= \t ->
+      putStrLn (s ++ t)
