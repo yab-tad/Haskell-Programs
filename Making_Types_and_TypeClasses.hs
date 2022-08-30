@@ -13,7 +13,9 @@
 import Data.List
 import qualified Data.Map as Map
 import qualified Data.Maybe as Maybe
+import Text.Read (readMaybe)
 import GHC (typecheckModule)
+import Control.Monad.Trans.Writer (Writer)
 
 
 -- Algebraic Data types
@@ -653,8 +655,8 @@ data Frank a b = Frank {frankField :: b a} deriving (Show)
 class Tofu t where
     tofu :: j a -> t j a
 
-instance Tofu Frank where
-    tofu x = Frank x
+-- instance Tofu Frank where
+--     tofu x = Frank x
 
 
 
@@ -695,4 +697,84 @@ cmap func (Collection' a) = Collection' (fmap func a) --(<> "!") ["Hello","Fello
         ghci> 1 <$ [1..5]
         [1,1,1,1,1]
 -}
+
+readEither :: Read a => String -> Either String a
+readEither s = case readMaybe s of
+        Maybe.Nothing -> Left $ "Can't parse : " ++ s
+        Maybe.Just a -> Right a
+
+foo :: String -> String -> String -> Either String Int
+foo a b c = case readEither a of
+        Left err -> Left err
+        Right k -> case readEither b of
+                Left err -> Left err
+                Right l -> case readEither c of
+                        Left err -> Left err
+                        Right m -> Right (k + l + m)
+
+{-      *Main> foo "1" "2" "3"
+                Right 6
+        *Main> foo "" "" ""
+                Left "Can't parse : "
+        *Main> foo "1" "2" "abc"
+                Left "Can't parse : abc"
+-}
+
+bindEither :: Either String a -> (a -> Either String b) -> Either String b
+bindEither (Left err) _ = Left err
+bindEither (Right x) f = f x
+
+foo' :: String -> String -> String -> Either String Int
+foo' a b c = readEither a `bindEither` \k ->
+                readEither b `bindEither` \l ->
+                        readEither c `bindEither` \m -> Right (k + l + m)
+
+{-      *Main> foo "1" "2" "3"
+                Right 6
+        *Main> foo "" "" ""
+                Left "Can't parse : "
+        *Main> foo "1" "2" "abc"
+                Left "Can't parse : abc"
+-}
+
+data Writer' a = Writer' a [String]
+    deriving (Show)
+
+number :: Int -> Writer' Int
+number n = Writer' n ["number: " ++ show n]
+
+tell :: [String] -> Writer' ()
+tell = Writer' ()
+
+bindWriter :: Writer' a -> (a -> Writer' b) -> Writer' b
+bindWriter (Writer' a xs) f =
+    let Writer' b ys = f a
+    in
+        Writer' b $ xs ++ ys
+
+foo3 :: Writer' Int -> Writer' Int -> Writer' Int -> Writer' Int
+foo3 x y z =
+    x `bindWriter` \k ->
+        y  `bindWriter` \l ->
+            z `bindWriter` \m -> 
+            let s = k + l + m
+            in tell ["Sum : " ++ show s] `bindWriter` \_ ->
+                Writer' s []
+-- foo3 (Writer' x xs) (Writer' y ys) (Writer' z zs) = 
+    -- let s = x + y + z
+    --     Writer' _ us = tell ["Sum: " ++ show s]
+    -- in
+    --     Writer' s $ xs ++ ys ++ zs ++ us
+{- 
+    Without the 'tell' function and additional let components
+        *Main> foo3 (number 1) (number 2) (number 3)
+            Writer' 6 ["number: 1","number: 2","number: 3"]
+    With the `tell` function and additonal let components
+        *Main> foo3 (number 1) (number 2) (number 3)
+            Writer' 6 ["number: 1","number: 2","number: 3","Sum: 6"]
+    With `bindWriter`
+        *Main> foo3 (number 1) (number 2) (number 3)
+            Writer' 6 ["number: 1","number: 2","number: 3","Sum: 6"]
+-}
+
 

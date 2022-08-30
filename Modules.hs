@@ -3,7 +3,6 @@ import qualified Data.Map as Map
 import Data.Maybe()
 import Data.Char ( isUpper )
 import InteractiveEval (Term(val))
-import Text.Read (readMaybe)
 import Hoopl.Block (MaybeO(JustO))
 
 -- number of unique elements in a list
@@ -323,37 +322,4 @@ insertW f k v xs = Map.insertWith f k v $ Map.fromList xs
 -- addInsertW (*) 3 100 [(3,200),(4,400)] returns fromList [(3,20000),(4,400)]
 
 
-foo :: String -> String -> String -> Either String Int
-foo a b c = case readMaybe a of
-        Nothing -> Left "Can't parse: " ++ a
-        Just k -> case readMaybe b of
-                Nothing -> Nothing
-                Just l -> case readMaybe c of
-                        Nothing -> Nothing
-                        Just m -> Just (k + l + m)
-
-{-      *Main> foo "1" "2" "3" 
-                Just 6
-        *Main> foo "" " " ""
-                Nothing
-        *Main> foo "1" "4" ""
-                Nothing
--}
-
-bindMaybe :: Maybe a -> (a -> Maybe b) -> Maybe b
-bindMaybe Nothing _ = Nothing
-bindMaybe (Just x) f = f x
-
-foo' :: String -> String -> String -> Maybe Int
-foo' a b c = readMaybe a `bindMaybe` \k ->
-                readMaybe b `bindMaybe` \l ->
-                        readMaybe c `bindMaybe` \m -> Just (k + l + m)
-
-{-      *Main> foo' "1" "2" "3" 
-                Just 6
-        *Main> foo' "" " " ""
-                Nothing
-        *Main> foo' "1" "4" ""
-                Nothing
--}
 
