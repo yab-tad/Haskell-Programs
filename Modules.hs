@@ -1,8 +1,9 @@
 import Data.List
 import qualified Data.Map as Map
 import Data.Maybe()
-import Data.Char
+import Data.Char ( isUpper )
 import InteractiveEval (Term(val))
+import Hoopl.Block (MaybeO(JustO))
 
 -- number of unique elements in a list
 numUnq :: Eq a => [a] -> Int
@@ -319,4 +320,6 @@ filterUpp xs = Map.filter isUpper $ Map.fromList xs
 insertW :: Ord a => (a -> a -> a) -> a -> a -> [(a,a)] -> Map.Map a a
 insertW f k v xs = Map.insertWith f k v $ Map.fromList xs
 -- addInsertW (*) 3 100 [(3,200),(4,400)] returns fromList [(3,20000),(4,400)]
+
+
 
